@@ -39,7 +39,7 @@ main,
 
   display: grid;
   /* height: 100%; */
-  grid-template-rows: 50% 50%;
+  grid-template-rows: 10% 30% 60%;
   grid-template-columns: 100%;
 
   /* min-width: 0; */
@@ -58,8 +58,8 @@ main,
 .value-box {
   margin: 5px;
   border: 1px dashed lightsteelblue;
-  height: 70px;
-  width: 110px;
+  height: 40px;
+  width: 180px;
   padding: 10px;
 }
 
@@ -70,7 +70,7 @@ main,
 }
 
 .value-value {
-  font-size: 32px;
+  font-size: 14px;
 }
 
 .device {
