@@ -11,7 +11,7 @@ export type Packet = {
 };
 
 export function getDevices(): Promise<Device[]> {
-  return fetch("ric/api/v1/objects").then((resp) => resp.json());
+  return fetch("ric/api/v1/objects?where.model=613f3bc9e0f250001005190f&where.model=613f3bf6e0f2500010051916").then((resp) => resp.json());
 }
 
 export function getPackets(

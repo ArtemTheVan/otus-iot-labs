@@ -16,6 +16,9 @@ import {
 
 import "./index.css";
 
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
+
 const COLORS = [
   "#1890FF",
   "#2FC25B",
@@ -29,21 +32,14 @@ const COLORS = [
 ];
 
 const PARAMS = [
-  "_bot",
-  "_gid",
-  "_id",
-  "_mid",
-  "_msgid",
-  "_oid",
-  "_psd",
-  "_ts",
-  "_web",
-  "id",
-  "online",
-  "payload",
-  "service",
-  "time",
-  "topic",
+  [
+    "temperature-inside",
+    "humidity-inside",
+  ],
+  [
+    "mass",
+    "speed",
+  ],
 ];
 
 document.title = "Hello";
@@ -78,6 +74,7 @@ class App extends React.Component<{}, AppState> {
     device: devices[0],
     packets: [],
   };
+  tabIndex: number = 0;
 
   componentDidMount() {
     if (!this.state.packets.length) {
@@ -103,7 +100,18 @@ class App extends React.Component<{}, AppState> {
     this.setState({ packets });
   }
 
+  params_string(index: number) {
+    let params_res: string = "";
+    
+    for (const p of PARAMS[index]) {
+      params_res += p + " ";
+    }
+
+    return (params_res);
+  }
+
   getDeviceList() {
+    console.log("getDeviceList");
     return devices.map((dev) => (
       <ListItem
         key={dev._id}
@@ -120,6 +128,8 @@ class App extends React.Component<{}, AppState> {
 
     const device_name = (this.state.device?.name);
 
+    let tabIndex = this.tabIndex;
+
     console.log(packet);
 
     const keys = Object.keys(packet).map(key => {
@@ -134,9 +144,11 @@ class App extends React.Component<{}, AppState> {
     console.log(keys);
 
     const params = keys.filter(function( element ) {
-      return (element !== undefined) && (!PARAMS.includes(element));
+      return (element !== undefined) && (PARAMS[tabIndex].includes(element));
     });
 
+    console.log(tabIndex);
+    console.log(this.tabIndex);
     console.log(params);
 
     const values = params.map((k) => (
@@ -183,17 +195,31 @@ class App extends React.Component<{}, AppState> {
         <div className="head"></div>
         <div className="left">
           {(
-            <span>Список устройств:</span>
+            <span>Список объектов:</span>
           )}
           {this.getDeviceList()}
         </div>
         <div className="main">
           <div className="value-title">
             {(
-              <span>Имя выбранного устройства:&nbsp;</span>
+              <span>Имя выбранного объекта:&nbsp;</span>
             )}
             {device_name}
           </div>
+          <Tabs defaultIndex={this.tabIndex} onSelect={index => {
+              console.log("tonSelectabs:");
+              this.tabIndex = (index);
+              this.loadPackets(this.state.device);
+              console.log(this.tabIndex);
+            }
+          }>
+          <TabList>
+           <Tab>{this.params_string(0)}</Tab>
+           <Tab>{this.params_string(1)}</Tab>
+          </TabList>
+          <TabPanel></TabPanel>
+          <TabPanel></TabPanel>
+          </Tabs>
           <div className="value-boxes">
             {values}
             {values.length === 0 && (
