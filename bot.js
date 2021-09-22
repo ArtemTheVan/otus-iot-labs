@@ -10,14 +10,14 @@ const { getDefaultClient } = require('@rightech/api');
 
 const ric = getDefaultClient({ token: process.env.RIC_API_TOKEN });
 
-const objectId = '613e018d5dab3700105bd327';
+const objectId = '613f74015dab3700105c0365';
 
 ric.get('/objects').then(objects => {
    console.log(objects);
 });
 
 const hello = `
-По нажатию на кнопку бот отправляет запрос в платформу на открытие или закрытие замка
+По нажатию на кнопку бот отправляет запрос в платформу на открытие шлагбаума
 `;
 
 bot.help((ctx) => {
@@ -39,13 +39,10 @@ bot.use((ctx, next) => {
 
 bot.command("start", async (ctx) => {
 
-  const object = await ric.get(`objects/${objectId}`);
-
-  ctx.reply(hello + ` 
-    Сейчас замок ${!object.state.lock ? "открыт" : "закрыт"}, доступна команда:`,
-    Markup.inlineKeyboard([
-    Markup.button.callback(`${!object.state.lock ? "Закрыть замок" : "Открыть замок"}`, 'send-command ' + `${!object.state.lock ? "close" : "open"}`),
-  ]))
+     ctx.reply(hello + ``,
+       Markup.inlineKeyboard([
+       Markup.button.callback(`Прибыл`, 'send-command ' + `barrier-on`),
+     ]))
 });
 
 bot.action(/send-command (.*)/, async (ctx) => {
@@ -57,7 +54,26 @@ bot.action(/send-command (.*)/, async (ctx) => {
   
   try {
     const res = await ric.post(`objects/${objectId}/commands/${command}`);
-    ctx.editMessageText(command + ' ok');
+
+    let delay = 1000;
+    let timerId = setTimeout(async function request() {
+      const object = await ric.get(`objects/${objectId}`);
+      if (object.state.barrier) {
+        ctx.editMessageText('Отлично! Вы можете проехать на разгрузку к складу №5');
+      } else
+      {
+        // увеличить интервал для следующего запроса
+        delay *= 2;
+        // ctx.editMessageText('delay: ' + delay);
+        if (delay >= 8000)
+        {
+          ctx.editMessageText('Что-то пошло не так, можно попробовать еще раз');
+          return;
+        }
+      }
+      timerId = setTimeout(request, delay);
+    }, delay);
+
   } catch (err) {
     ctx.editMessageText(err.toString())
   }
